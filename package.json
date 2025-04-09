@@ -1,0 +1,14 @@
+{
+    "name": "notion-music-api",
+    "version": "1.0.0",
+    "description": "Notion Music API with Netlify Functions",
+    "dependencies": {
+      "@notionhq/client": "^1.0.4"
+    },
+    "scripts": {
+      "dev": "netlify dev"
+    },
+    "devDependencies": {
+      "netlify-cli": "^12.0.0"
+    }
+  }

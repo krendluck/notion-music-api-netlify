@@ -1,0 +1,20 @@
+[build]
+  # 如果有静态内容需要构建
+  # publish = "出构建后的静态文件目录"
+  # command = "构建命令"
+  
+  # 指定函数目录
+  functions = "netlify/functions"
+
+# 路径重写，让 /api/music 路径指向 /.netlify/functions/music
+[[redirects]]
+  from = "/api/music"
+  to = "/.netlify/functions/music"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/update"
+  to = "/.netlify/functions/update"
+  status = 200
+  force = true
