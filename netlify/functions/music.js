@@ -33,9 +33,9 @@ exports.handler = async function(event, context) {
       database_id: process.env.NOTION_DATABASE_ID
     });
 
-    // 从数据库标题中提取歌手名称
-    const artist = databaseInfo.title[0]?.plain_text || "未知歌手";
-    console.log(`数据库名称 (歌手): ${artist}`);
+    // 获取数据库名称用于日志
+    const databaseName = databaseInfo.title[0]?.plain_text || "音乐数据库";
+    console.log(`数据库名称: ${databaseName}`);
 
     // 构建查询
     const queryParams = {
@@ -84,6 +84,7 @@ exports.handler = async function(event, context) {
                      result.properties.SongFile.files[0]?.file?.url;
         const lrcUrl = result.properties.LyricFile?.files[0]?.external?.url ||
                      result.properties.LyricFile?.files[0]?.file?.url;
+        const artist = result.properties.Artist?.rich_text[0]?.plain_text || "未知歌手";
         
         if(song && songUrl) {
           songs.push({
@@ -109,7 +110,7 @@ exports.handler = async function(event, context) {
     } else if (tag) {
       playlistName = `分类: ${tag}`;
     } else {
-      playlistName = artist; // 使用歌手名作为默认播放列表名
+      playlistName = databaseName; // 使用数据库名称作为默认播放列表名
     }
 
     return {
@@ -117,7 +118,7 @@ exports.handler = async function(event, context) {
       headers,
       body: JSON.stringify({
         name: playlistName,
-        artist: artist,
+        artist: databaseName,
         songs: songs
       })
     };
