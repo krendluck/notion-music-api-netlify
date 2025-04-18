@@ -39,7 +39,8 @@ exports.handler = async function(event, context) {
 
     // 构建查询
     const queryParams = {
-      database_id: process.env.NOTION_DATABASE_ID
+      database_id: process.env.NOTION_DATABASE_ID,
+      page_size: 100 // 每页最大记录数
     };
     
     // 添加过滤条件
@@ -71,13 +72,39 @@ exports.handler = async function(event, context) {
       };
     }
     
-    console.log("执行Notion查询...");
-    const results = await notion.databases.query(queryParams);
-    console.log(`查询结果: ${results.results.length}条记录`);
+    // 使用分页获取所有记录
+    let allResults = [];
+    let hasMore = true;
+    let nextCursor = undefined;
+    
+    while (hasMore) {
+      if (nextCursor) {
+        queryParams.start_cursor = nextCursor;
+      }
+      
+      console.log(`执行Notion查询，${nextCursor ? '游标: ' + nextCursor : '首页'}`);
+      try {
+        const response = await notion.databases.query(queryParams);
+        
+        allResults = allResults.concat(response.results);
+        console.log(`已获取记录总数: ${allResults.length}`);
+        
+        if (response.has_more && response.next_cursor) {
+          nextCursor = response.next_cursor;
+        } else {
+          hasMore = false;
+        }
+      } catch (error) {
+        console.error("Notion API查询错误:", error);
+        hasMore = false; // 停止循环以防止无限循环
+      }
+    }
+    
+    console.log(`查询结果: ${allResults.length}条记录`);
     
     // 构建歌曲列表
     const songs = [];
-    for(const result of results.results) {
+    for(const result of allResults) {
       try {
         const song = result.properties.Song.title[0]?.text?.content;
         const songUrl = result.properties.SongFile.files[0]?.external?.url || 
